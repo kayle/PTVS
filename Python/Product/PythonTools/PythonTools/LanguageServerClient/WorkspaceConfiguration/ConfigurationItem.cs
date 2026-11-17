@@ -4,7 +4,9 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+#if !DEV18_OR_LATER
 using Newtonsoft.Json;
+#endif
 
 namespace Microsoft.PythonTools.LanguageServerClient.WorkspaceConfiguration {
     /// <summary>
@@ -13,7 +15,9 @@ namespace Microsoft.PythonTools.LanguageServerClient.WorkspaceConfiguration {
     [DataContract]
     internal class ConfigurationItem {
         [DataMember]
+#if !DEV18_OR_LATER
         [JsonConverter(typeof(Microsoft.VisualStudio.LanguageServer.Protocol.DocumentUriConverter))]
+#endif
         public Uri scopeUri;
 
         [DataMember]

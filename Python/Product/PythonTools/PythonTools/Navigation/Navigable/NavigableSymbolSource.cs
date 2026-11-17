@@ -98,14 +98,12 @@ namespace Microsoft.PythonTools.Navigation.Navigable {
                     cancellationToken);
 
                 if (result != null) {
-                    if (result is JToken token) {
-                        var array = ResultConverter.ConvertResult(token);
-                        var locations = array as LSP.Location[];
-                        if (locations != null) {
-                            return locations.OrderBy(l => l.Range.Start.Line).Select(l => {
-                                return new NavigableSymbol(_serviceProvider, span.GetText(), l, span);
-                            }).ToArray();
-                        }
+                    var array = ResultConverter.ConvertResult(result);
+                    var locations = array as LSP.Location[];
+                    if (locations != null) {
+                        return locations.OrderBy(l => l.Range.Start.Line).Select(l => {
+                            return new NavigableSymbol(_serviceProvider, span.GetText(), l, span);
+                        }).ToArray();
                     }
                 }
             }

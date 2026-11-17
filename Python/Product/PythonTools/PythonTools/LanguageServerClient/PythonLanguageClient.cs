@@ -278,6 +278,14 @@ namespace Microsoft.PythonTools.LanguageServerClient {
 
         public Task AttachForCustomMessageAsync(JsonRpc rpc) {
 
+#if DEV18_OR_LATER
+            var formatter = rpc.MessageHandler.Formatter as SystemTextJsonFormatter;
+            if (formatter == null) {
+                throw new InvalidOperationException("The VS 18 language server must use System.Text.Json.");
+            }
+            ProtocolJsonSerialization.Configure(formatter.JsonSerializerOptions);
+#endif
+
             _rpc = rpc;
 
             // This is a workaround until we have proper API from ILanguageClient for now.

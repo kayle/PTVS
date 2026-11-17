@@ -1,8 +1,8 @@
 <#
     This script installs dependencies for PTVS, including pylance, debugpy, and all nuget packages.
 
-    PTVS consumes a public azure feed, defined in nuget.config.
-    However, the feed needs to be populated (once) when upgrading to new package versions, and feed population requires authentication.
+    PTVS consumes public and internal Azure feeds, defined in nuget.config.
+    The public feed needs to be populated (once) when upgrading to new package versions, and feed population requires authentication.
     See https://github.com/microsoft/PTVS/wiki/Build-and-Debug-Instructions-for-PTVS for instructions on how to authenticate.
 #>
 
@@ -92,6 +92,7 @@ $need_symlink = @(
     "Microsoft.DiaSymReader.Pdb2Pdb",
     "Microsoft.Extensions.FileSystemGlobbing",
     "Microsoft.VisualStudio.LanguageServer.Protocol",
+    "Microsoft.VisualStudio.LanguageServer.Protocol.Internal",
     "Microsoft.VisualStudio.Debugger.Engine",
     "Microsoft.VisualStudio.Interop",
     "Microsoft.VSSDK.BuildTools",

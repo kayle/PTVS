@@ -71,7 +71,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.InteractiveWindow" />
-    <Reference Include="Microsoft.VisualStudio.LanguageServer.Protocol">
+    <Reference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Condition="'$(VSTarget)' != '18.0'">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.LanguageServer.Protocol.Internal" Condition="'$(VSTarget)' == '18.0'">
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.LanguageServer.Client">
@@ -119,13 +122,13 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Text.Json, Version=8.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" Condition="'$(VSTarget)' == '18.0'">
-      <HintPath>$(PackagesPath)\System.Text.Json.8.0.5\lib\net462\System.Text.Json.dll</HintPath>
+    <Reference Include="System.Text.Json, Version=10.0.0.10, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" Condition="'$(VSTarget)' == '18.0'">
+      <HintPath>$(PackagesPath)\System.Text.Json.10.0.10\lib\net462\System.Text.Json.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>true</SpecificVersion>
     </Reference>
-    <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" Condition="'$(VSTarget)' == '18.0'">
-      <HintPath>$(PackagesPath)\System.Text.Encodings.Web.8.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
+    <Reference Include="System.Text.Encodings.Web, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" Condition="'$(VSTarget)' == '18.0'">
+      <HintPath>$(PackagesPath)\System.Text.Encodings.Web.10.0.10\lib\net462\System.Text.Encodings.Web.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>true</SpecificVersion>
     </Reference>
@@ -161,6 +164,7 @@
       <LogicalName>PythonToolsTests.CookiecutterSettings.json</LogicalName>
     </EmbeddedResource>
     <Compile Include="LspDiffTextEditFactoryTests.cs" />
+    <Compile Include="ProtocolJsonSerializationTests.cs" />
     <Compile Include="LanguageServerSettingsTests.cs" />
     <Compile Include="BuildTasksTests.cs" />
     <None Include="CodeCellTests.cs" />

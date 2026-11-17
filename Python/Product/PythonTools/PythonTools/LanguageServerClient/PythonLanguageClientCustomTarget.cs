@@ -20,6 +20,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Linq;
+#if DEV18_OR_LATER
+using System.Text.Json;
+#endif
 using Microsoft.PythonTools.Logging;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Threading;
@@ -31,6 +34,11 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.PythonTools.LanguageServerClient.WorkspaceConfiguration;
 using Microsoft.PythonTools.LanguageServerClient.FileWatcher;
 using Microsoft.PythonTools.LanguageServerClient.WorkspaceFolders;
+#if DEV18_OR_LATER
+using LspProtocol = Microsoft.VisualStudio.LanguageServer.Protocol;
+#else
+using LspProtocol = VisualStudio.LanguageServer.Protocol;
+#endif
 
 namespace Microsoft.PythonTools.LanguageServerClient {
     internal class PythonLanguageClientCustomTarget {
@@ -62,13 +70,21 @@ namespace Microsoft.PythonTools.LanguageServerClient {
         }
 
         private sealed class UnregistrationParamsCompat {
+#if DEV18_OR_LATER
+            [System.Text.Json.Serialization.JsonPropertyName("unregisterations")]
+#else
             [JsonProperty("unregisterations")]
-            public VisualStudio.LanguageServer.Protocol.Unregistration[] LegacyUnregistrations { get; set; }
+#endif
+            public LspProtocol.Unregistration[] LegacyUnregistrations { get; set; }
 
+#if DEV18_OR_LATER
+            [System.Text.Json.Serialization.JsonPropertyName("unregistrations")]
+#else
             [JsonProperty("unregistrations")]
-            public VisualStudio.LanguageServer.Protocol.Unregistration[] Unregistrations { get; set; }
+#endif
+            public LspProtocol.Unregistration[] Unregistrations { get; set; }
 
-            public VisualStudio.LanguageServer.Protocol.Unregistration[] GetUnregistrations() =>
+            public LspProtocol.Unregistration[] GetUnregistrations() =>
                 LegacyUnregistrations ?? Unregistrations;
         }
 
@@ -163,7 +179,7 @@ AnalysisComplete?.Invoke(this, EventArgs.Empty);
 
         [JsonRpcMethod("client/registerCapability", UseSingleObjectParameterDeserialization = true)]
         public void OnRegisterCapability(object arg) {
-            var regParams = Deserialize<VisualStudio.LanguageServer.Protocol.RegistrationParams>(arg);
+            var regParams = DeserializeProtocol<LspProtocol.RegistrationParams>(arg);
             if (regParams?.Registrations == null) {
                 return;
             }
@@ -213,10 +229,21 @@ AnalysisComplete?.Invoke(this, EventArgs.Empty);
                 return null;
             }
 
-            // Dev18 supplies System.Text.Json values; older formatters supply JToken.
             return arg is JToken token
                 ? token.ToObject<T>()
                 : JsonConvert.DeserializeObject<T>(arg.ToString());
+        }
+
+        private static T DeserializeProtocol<T>(object arg) where T : class {
+#if DEV18_OR_LATER
+            if (arg is JsonDocument jsonDocument) {
+                return jsonDocument.Deserialize<T>(ProtocolJsonSerialization.Options);
+            }
+            if (arg is JsonElement jsonElement) {
+                return jsonElement.Deserialize<T>(ProtocolJsonSerialization.Options);
+            }
+#endif
+            return Deserialize<T>(arg);
         }
 
         [JsonRpcMethod("workspace/workspaceFolders")]

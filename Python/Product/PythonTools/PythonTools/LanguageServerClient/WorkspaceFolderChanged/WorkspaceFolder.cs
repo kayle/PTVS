@@ -16,7 +16,6 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.VisualStudio.LanguageServer.Protocol;
 
 namespace Microsoft.PythonTools.LanguageServerClient.WorkspaceFolderChanged {
     [DataContract]
@@ -25,7 +24,9 @@ namespace Microsoft.PythonTools.LanguageServerClient.WorkspaceFolderChanged {
          * The associated URI for this workspace folder.
          */
         [DataMember]
-        [Newtonsoft.Json.JsonConverter(typeof(DocumentUriConverter))]
+#if !DEV18_OR_LATER
+        [Newtonsoft.Json.JsonConverter(typeof(Microsoft.VisualStudio.LanguageServer.Protocol.DocumentUriConverter))]
+#endif
         public Uri uri;
 
         /**

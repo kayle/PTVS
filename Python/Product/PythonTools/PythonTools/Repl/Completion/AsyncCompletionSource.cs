@@ -124,22 +124,17 @@ namespace Microsoft.PythonTools.Repl.Completion {
             // otherwise, parse the Documentation property
             if (protocolItem.Documentation != null) {
                 var documentationBuilder = new StringBuilder();
+#if DEV18_OR_LATER
+                var documentation = protocolItem.Documentation.Value;
+                var content = documentation is LSP.MarkupContent markupContent
+                    ? GetMarkupContent(markupContent)
+                    : documentation as string;
+#else
                 var content = protocolItem.Documentation.Value.Match(
                     s => s,
-                    markupContent => {
-                        if (markupContent.Kind == LSP.MarkupKind.Markdown) {
-                            var codeBlocks = MarkdownUtil.ExtractCodeBlocks(markupContent.Value);
-                            var joinedBlocks = string.Join(Environment.NewLine, codeBlocks);
-                            if (string.IsNullOrEmpty(joinedBlocks)) {
-                                return null;
-                            }
-
-                            return joinedBlocks;
-                        }
-                        else {
-                            return markupContent.Value;
-                        }
-                    });
+                    GetMarkupContent
+                );
+#endif
 
                 if (!string.IsNullOrEmpty(content)) {
                     if (documentationBuilder.Length > 0) {
@@ -153,6 +148,20 @@ namespace Microsoft.PythonTools.Repl.Completion {
             }
 
             return null;
+        }
+
+        private static string GetMarkupContent(LSP.MarkupContent markupContent) {
+            if (markupContent.Kind == LSP.MarkupKind.Markdown) {
+                var codeBlocks = MarkdownUtil.ExtractCodeBlocks(markupContent.Value);
+                var joinedBlocks = string.Join(Environment.NewLine, codeBlocks);
+                if (string.IsNullOrEmpty(joinedBlocks)) {
+                    return null;
+                }
+
+                return joinedBlocks;
+            }
+
+            return markupContent.Value;
         }
 
         public CompletionStartData InitializeCompletion(CompletionTrigger trigger, VisualStudio.Text.SnapshotPoint triggerLocation, CancellationToken token) {
@@ -378,7 +387,7 @@ namespace Microsoft.PythonTools.Repl.Completion {
             var items = new List<(ILanguageClient client, LSP.CompletionItem completionItem, Func<LSP.CompletionItem, CancellationToken, Task<LSP.CompletionItem>> resolver)>();
             var suggestionMode = false;
             object taskResults = await completionTask.ConfigureAwait(false);
-            var converted = ResultConverter.ConvertResult(taskResults as Newtonsoft.Json.Linq.JObject) as LSP.CompletionList[];
+            var converted = ResultConverter.ConvertResult(taskResults) as LSP.CompletionList[];
             Func<LSP.CompletionItem, CancellationToken, Task<LSP.CompletionItem>> resolveFunc = (c, t) => this.languageClient.InvokeResolveAsync(c, t);
             if (converted != null) {
                 foreach (var completionItem in converted[0].Items) {
